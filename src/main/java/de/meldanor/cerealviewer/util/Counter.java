@@ -22,30 +22,54 @@
  *  THE SOFTWARE.
  */
 
-package de.meldanor.cerealviewer;
+package de.meldanor.cerealviewer.util;
 
-import java.nio.file.Paths;
-import java.util.List;
+public class Counter implements Comparable<Counter> {
 
-import javafx.application.Application;
-import de.meldanor.cerealviewer.data.Cereal;
-import de.meldanor.cerealviewer.data.CerealReader;
-import de.meldanor.cerealviewer.gui.MainGUI;
+    private long value;
 
-public class Core {
+    public Counter() {
+        value = 0;
+    }
 
-    public static List<Cereal> cereals;
+    public void increment() {
+        ++value;
+    }
 
-    public static void main(String[] args) {
-        CerealReader reader = new CerealReader();
-        try {
-            cereals = reader.parse(Paths.get(Core.class.getResource("/cereals.csv").toURI()).toFile());
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(-1);
-        }
+    public void decrement() {
+        --value;
+    }
 
-        System.out.println(cereals);
-        Application.launch(MainGUI.class, args);
+    public long get() {
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return "Counter [value=" + value + "]";
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (int) (value ^ (value >>> 32));
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+
+        if (obj == null || !(obj instanceof Counter))
+            return false;
+
+        return this.value == ((Counter) obj).value;
+    }
+
+    @Override
+    public int compareTo(Counter o) {
+        return (int) Math.subtractExact(value, o.value);
     }
 }

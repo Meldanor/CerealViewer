@@ -22,30 +22,28 @@
  *  THE SOFTWARE.
  */
 
-package de.meldanor.cerealviewer;
+package de.meldanor.cerealviewer.gui;
 
-import java.nio.file.Paths;
-import java.util.List;
-
+import de.meldanor.cerealviewer.Core;
 import javafx.application.Application;
-import de.meldanor.cerealviewer.data.Cereal;
-import de.meldanor.cerealviewer.data.CerealReader;
-import de.meldanor.cerealviewer.gui.MainGUI;
+import javafx.scene.Group;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
-public class Core {
+public class MainGUI extends Application {
 
-    public static List<Cereal> cereals;
+    @Override
+    public void start(Stage stage) throws Exception {
+        Group root = new Group();
+        Scene scene = new Scene(root);
+        stage.setTitle("Imported Fruits");
+        stage.setWidth(500);
+        stage.setHeight(500);
 
-    public static void main(String[] args) {
-        CerealReader reader = new CerealReader();
-        try {
-            cereals = reader.parse(Paths.get(Core.class.getResource("/cereals.csv").toURI()).toFile());
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(-1);
-        }
+        root.getChildren().add(new ManufactorPie(scene, Core.cereals));
 
-        System.out.println(cereals);
-        Application.launch(MainGUI.class, args);
+        stage.setScene(scene);
+        stage.show();
+
     }
 }
