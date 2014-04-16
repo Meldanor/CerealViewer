@@ -24,27 +24,44 @@
 
 package de.meldanor.cerealviewer.gui;
 
-import de.meldanor.cerealviewer.Core;
-import javafx.application.Application;
-import javafx.scene.Group;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
+import java.util.List;
 
-public class MainGUI extends Application {
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+import de.meldanor.cerealviewer.data.Cereal;
 
-    @Override
-    public void start(Stage stage) throws Exception {
-        Group root = new Group();
-        Scene scene = new Scene(root);
-        stage.setTitle("Imported Fruits");
-        stage.setWidth(800);
-        stage.setHeight(1024);
+public class ContentBarChart extends BarChart<String, Number> {
 
-//        root.getChildren().add(new ManufactorPie(scene, Core.cereals));
-        root.getChildren().add(new ContentBarChart(Core.cereals));
+    private List<Cereal> cereals;
 
-        stage.setScene(scene);
-        stage.show();
+    public ContentBarChart(List<Cereal> cereals) {
+        super(new CategoryAxis(), new NumberAxis());
+
+        this.cereals = cereals;
+
+        this.initGUI();
+    }
+
+    private void initGUI() {
+        // Type Calories Protein Fat Sodium Fiber Carbohydrates Sugars Potassium
+
+        Series<String, Number> series = new Series<>();
+
+        // Calories
+        series.setName("Calories");
+        List<Data<String, Number>> list = series.getData();
+        cereals.forEach(c -> {
+            list.add(new Data<>(c.getName(), c.getCalories()));
+        });
+        this.getData().add(series);
+
+//        // Calories
+//        series = new Series<>();
+//        series.setName("Calories");
+//        list = series.getData();
+//        cereals.forEach(c -> list.add(new Data<>(c.getName(), c.getCalories())));
+//        this.getData().add(series);
 
     }
 }
