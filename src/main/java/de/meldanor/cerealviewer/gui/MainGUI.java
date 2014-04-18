@@ -37,11 +37,13 @@ public class MainGUI extends Application {
         Group root = new Group();
         Scene scene = new Scene(root);
         stage.setTitle("Imported Fruits");
-        stage.setWidth(800);
-        stage.setHeight(1024);
+        stage.setWidth(1650);
+        stage.setHeight(800);
 
-//        root.getChildren().add(new ManufactorPie(scene, Core.cereals));
-        root.getChildren().add(new ContentBarChart(Core.cereals));
+        ContentBarChart chart = new ContentBarChart(Core.cereals);
+        chart.setPrefHeight(750);
+        chart.setPrefWidth(1650);
+        root.getChildren().add(chart);
 
         stage.setScene(scene);
         stage.show();

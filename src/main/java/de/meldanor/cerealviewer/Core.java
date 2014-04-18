@@ -44,8 +44,9 @@ public class Core {
             e.printStackTrace();
             System.exit(-1);
         }
+        
+        cereals.removeIf((c) -> c.getName().charAt(0) > 'D');
 
-        System.out.println(cereals);
         Application.launch(MainGUI.class, args);
     }
 }

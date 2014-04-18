@@ -25,10 +25,17 @@
 package de.meldanor.cerealviewer.gui;
 
 import java.util.List;
+import java.util.Set;
 
+import javafx.scene.Node;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Region;
+
+import com.sun.javafx.charts.Legend;
+
 import de.meldanor.cerealviewer.data.Cereal;
 
 public class ContentBarChart extends BarChart<String, Number> {
@@ -44,24 +51,42 @@ public class ContentBarChart extends BarChart<String, Number> {
     }
 
     private void initGUI() {
-        // Type Calories Protein Fat Sodium Fiber Carbohydrates Sugars Potassium
 
-        Series<String, Number> series = new Series<>();
-
-        // Calories
-        series.setName("Calories");
-        List<Data<String, Number>> list = series.getData();
-        cereals.forEach(c -> {
-            list.add(new Data<>(c.getName(), c.getCalories()));
+        this.getLegend().addEventFilter(MouseEvent.MOUSE_CLICKED, (e) -> {
+            Region reg = (Region) e.getTarget();
+            reg.
         });
+
+//        addEventFilter(MouseEvent.MOUSE_CLICKED, (e) -> {
+//            if (e.getTarget() instanceof Legend) {
+//                System.out.println("lol");
+//            }
+//            System.out.println(e.getTarget());
+//        });
+
+        setVerticalGridLinesVisible(false);
+
+        addData("Calories", (Cereal c) -> new Data<>(c.getName(), c.getCalories()));
+        addData("Protein", (Cereal c) -> new Data<>(c.getName(), c.getProtein()));
+        addData("Fat", (Cereal c) -> new Data<>(c.getName(), c.getFat()));
+        addData("Sodium", (Cereal c) -> new Data<>(c.getName(), c.getSodium()));
+        addData("Fiber", (Cereal c) -> new Data<>(c.getName(), c.getFiber()));
+        addData("Carbohydrates", (Cereal c) -> new Data<>(c.getName(), c.getCarbohydrates()));
+        addData("Sugars", (Cereal c) -> new Data<>(c.getName(), c.getSugars()));
+        addData("Potassium", (Cereal c) -> new Data<>(c.getName(), c.getPotassium()));
+    }
+
+    private void addData(String name, DataCreator creator) {
+        Series<String, Number> series = new Series<>();
+        series.setName(name);
+
+        final List<Data<String, Number>> list = series.getData();
+        cereals.forEach(c -> list.add(creator.construct(c)));
         this.getData().add(series);
+    }
 
-//        // Calories
-//        series = new Series<>();
-//        series.setName("Calories");
-//        list = series.getData();
-//        cereals.forEach(c -> list.add(new Data<>(c.getName(), c.getCalories())));
-//        this.getData().add(series);
-
+    @FunctionalInterface
+    private interface DataCreator {
+        public Data<String, Number> construct(Cereal c);
     }
 }
