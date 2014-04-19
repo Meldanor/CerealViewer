@@ -25,6 +25,12 @@
 package de.meldanor.cerealviewer.gui;
 
 import java.util.List;
+import java.util.OptionalDouble;
+import java.util.function.DoubleBinaryOperator;
+import java.util.function.Predicate;
+import java.util.function.ToDoubleFunction;
+import java.util.stream.DoubleStream;
+import java.util.stream.Stream;
 
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
@@ -46,15 +52,19 @@ public class ContentBarChart extends BarChart<String, Number> {
     private void initGUI() {
 
         setVerticalGridLinesVisible(false);
+        setCategoryGap(100);
+        setBarGap(0);
 
-        addData("Calories", (Cereal c) -> new Data<>(c.getName(), c.getCalories()));
-        addData("Protein", (Cereal c) -> new Data<>(c.getName(), c.getProtein()));
-        addData("Fat", (Cereal c) -> new Data<>(c.getName(), c.getFat()));
-        addData("Sodium", (Cereal c) -> new Data<>(c.getName(), c.getSodium()));
-        addData("Fiber", (Cereal c) -> new Data<>(c.getName(), c.getFiber()));
-        addData("Carbohydrates", (Cereal c) -> new Data<>(c.getName(), c.getCarbohydrates()));
-        addData("Sugars", (Cereal c) -> new Data<>(c.getName(), c.getSugars()));
-        addData("Potassium", (Cereal c) -> new Data<>(c.getName(), c.getPotassium()));
+//        cereal.
+
+        addData("Calories", (Cereal c) -> new Data<>(Integer.toString(c.getShelf()), c.getCalories()));
+        addData("Protein", (Cereal c) -> new Data<>(Integer.toString(c.getShelf()), c.getProtein()));
+        addData("Fat", (Cereal c) -> new Data<>(Integer.toString(c.getShelf()), c.getFat()));
+        addData("Sodium", (Cereal c) -> new Data<>(Integer.toString(c.getShelf()), c.getSodium()));
+        addData("Fiber", (Cereal c) -> new Data<>(Integer.toString(c.getShelf()), c.getFiber()));
+        addData("Carbohydrates", (Cereal c) -> new Data<>(Integer.toString(c.getShelf()), c.getCarbohydrates()));
+        addData("Sugars", (Cereal c) -> new Data<>(Integer.toString(c.getShelf()), c.getSugars()));
+        addData("Potassium", (Cereal c) -> new Data<>(Integer.toString(c.getShelf()), c.getPotassium()));
     }
 
     private void addData(String name, DataCreator creator) {
@@ -62,21 +72,52 @@ public class ContentBarChart extends BarChart<String, Number> {
         series.setName(name);
 
         final List<Data<String, Number>> list = series.getData();
-        cereals.forEach(c -> list.add(creator.construct(c)));
+        cereals.stream().sorted((c1, c2) -> c1.getShelf() - c2.getShelf()).forEach(c -> list.add(creator.construct(c)));
         this.getData().add(series);
     }
-
     @FunctionalInterface
     private interface DataCreator {
         public Data<String, Number> construct(Cereal c);
     }
 
+    private void showData(DoubleBinaryOperator op) {
+        this.getData().clear();
+
+        showData(c -> c.getShelf() == 1, 1, op);
+        showData(c -> c.getShelf() == 2, 2, op);
+        showData(c -> c.getShelf() == 3, 3, op);
+    }
+
+    private void showData(Predicate<? super Cereal> p, int shelf, DoubleBinaryOperator op) {
+        showData(cereals.stream().filter(p), shelf, "Calories", Cereal::getCalories, op);
+        showData(cereals.stream().filter(p), shelf,"Protein", Cereal::getProtein, op);
+        showData(cereals.stream().filter(p), shelf,"Fat", Cereal::getFat, op);
+        showData(cereals.stream().filter(p), shelf,"Sodium", Cereal::getSodium, op);
+        showData(cereals.stream().filter(p), shelf,"Fiber", Cereal::getFiber, op);
+        showData(cereals.stream().filter(p), shelf,"Carbohydrates", Cereal::getCarbohydrates, op);
+        showData(cereals.stream().filter(p), shelf,"Sugars", Cereal::getSugars, op);
+        showData(cereals.stream().filter(p), shelf,"Potassium", Cereal::getPotassium, op);
+    }
+
+    private void showData(Stream<Cereal> stream, int shelf, String name, ToDoubleFunction<? super Cereal> function, DoubleBinaryOperator op) {
+        Series<String, Number> series = new Series<>();
+        series.setName(name);
+        
+//        cereals.stream().col
+//        System.out.println(function);
+        DoubleStream dStream = stream.mapToDouble(function);
+        OptionalDouble val = dStream.reduce(op);
+        
+        series.getData().add(new Data<String, Number>(Integer.toString(shelf), val.getAsDouble()));
+        this.getData().add(series);
+    }
+
     public void showMaximum() {
-        System.out.println("Show maximum!");
+        showData(Double::max);
     }
 
     public void showMinimum() {
-        System.out.println("Show minimum!");
+        showData(Double::min);
     }
 
     public void showAverage() {
