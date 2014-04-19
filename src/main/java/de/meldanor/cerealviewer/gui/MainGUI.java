@@ -24,29 +24,67 @@
 
 package de.meldanor.cerealviewer.gui;
 
-import de.meldanor.cerealviewer.Core;
 import javafx.application.Application;
-import javafx.scene.Group;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
+import javafx.scene.control.Toggle;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import de.meldanor.cerealviewer.Core;
 
 public class MainGUI extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        Group root = new Group();
-        Scene scene = new Scene(root);
-        stage.setTitle("Imported Fruits");
-        stage.setWidth(1650);
-        stage.setHeight(800);
+
+        stage.setTitle("Cereals");
+
+        BorderPane pane = new BorderPane();
 
         ContentBarChart chart = new ContentBarChart(Core.cereals);
-        chart.setPrefHeight(750);
-        chart.setPrefWidth(1650);
-        root.getChildren().add(chart);
+        pane.setCenter(chart);
+
+        VBox controllPane = new VBox(20.0);
+        controllPane.setPadding(new Insets(100, 20, 10, 10));
+
+        ToggleGroup controllGroup = new ToggleGroup();
+        controllGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
+            public void changed(ObservableValue<? extends Toggle> ov, Toggle toggle, Toggle new_toggle) {
+                if (toggle != null)
+                    ((ToggleButton) toggle).setDisable(false);
+                if (new_toggle != null)
+                    ((ToggleButton) new_toggle).setDisable(true);
+            }
+        });
+
+        ToggleButton showMaxButton = new ToggleButton("Maximum");
+        showMaxButton.setToggleGroup(controllGroup);
+        showMaxButton.setOnAction(e -> chart.showMaximum());
+
+        ToggleButton showMinButton = new ToggleButton("Minimum");
+        showMinButton.setToggleGroup(controllGroup);
+        showMinButton.setOnAction(e -> chart.showMinimum());
+
+        ToggleButton showMedianButton = new ToggleButton("Median");
+        showMedianButton.setToggleGroup(controllGroup);
+        showMedianButton.setOnAction(e -> chart.showMedian());
+
+        ToggleButton showAverageButton = new ToggleButton("Average");
+        showAverageButton.setToggleGroup(controllGroup);
+        showAverageButton.setOnAction(e -> chart.showAverage());
+
+        controllPane.getChildren().addAll(showAverageButton, showMaxButton, showMedianButton, showMinButton);
+
+        pane.setRight(controllPane);
+
+        Scene scene = new Scene(pane);
 
         stage.setScene(scene);
         stage.show();
-
     }
 }

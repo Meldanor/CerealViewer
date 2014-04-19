@@ -25,17 +25,10 @@
 package de.meldanor.cerealviewer.gui;
 
 import java.util.List;
-import java.util.Set;
 
-import javafx.scene.Node;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Region;
-
-import com.sun.javafx.charts.Legend;
-
 import de.meldanor.cerealviewer.data.Cereal;
 
 public class ContentBarChart extends BarChart<String, Number> {
@@ -51,18 +44,6 @@ public class ContentBarChart extends BarChart<String, Number> {
     }
 
     private void initGUI() {
-
-        this.getLegend().addEventFilter(MouseEvent.MOUSE_CLICKED, (e) -> {
-            Region reg = (Region) e.getTarget();
-            reg.
-        });
-
-//        addEventFilter(MouseEvent.MOUSE_CLICKED, (e) -> {
-//            if (e.getTarget() instanceof Legend) {
-//                System.out.println("lol");
-//            }
-//            System.out.println(e.getTarget());
-//        });
 
         setVerticalGridLinesVisible(false);
 
@@ -88,5 +69,21 @@ public class ContentBarChart extends BarChart<String, Number> {
     @FunctionalInterface
     private interface DataCreator {
         public Data<String, Number> construct(Cereal c);
+    }
+
+    public void showMaximum() {
+        System.out.println("Show maximum!");
+    }
+
+    public void showMinimum() {
+        System.out.println("Show minimum!");
+    }
+
+    public void showAverage() {
+        System.out.println("Show average!");
+    }
+
+    public void showMedian() {
+        System.out.println("Show median!");
     }
 }
