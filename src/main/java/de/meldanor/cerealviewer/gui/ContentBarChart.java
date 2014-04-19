@@ -24,13 +24,13 @@
 
 package de.meldanor.cerealviewer.gui;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.OptionalDouble;
 import java.util.function.DoubleBinaryOperator;
-import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
-import java.util.stream.DoubleStream;
-import java.util.stream.Stream;
 
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
@@ -39,14 +39,27 @@ import de.meldanor.cerealviewer.data.Cereal;
 
 public class ContentBarChart extends BarChart<String, Number> {
 
-    private List<Cereal> cereals;
+    private Map<Integer, List<Cereal>> mapByShelf;
 
     public ContentBarChart(List<Cereal> cereals) {
-        super(new CategoryAxis(), new NumberAxis());
+        super(new CategoryAxis(), new NumberAxis(0,350,50));
 
-        this.cereals = cereals;
+        this.prepareData(cereals);
 
         this.initGUI();
+    }
+
+    private void prepareData(List<Cereal> cereals) {
+        mapByShelf = new HashMap<>();
+
+        cereals.forEach((Cereal c) -> {
+            List<Cereal> list = mapByShelf.get(c.getShelf());
+            if (list == null) {
+                list = new ArrayList<Cereal>();
+                mapByShelf.put(c.getShelf(), list);
+            }
+            list.add(c);
+        });
     }
 
     private void initGUI() {
@@ -54,61 +67,35 @@ public class ContentBarChart extends BarChart<String, Number> {
         setVerticalGridLinesVisible(false);
         setCategoryGap(100);
         setBarGap(0);
+        setAnimated(false);
 
-//        cereal.
-
-        addData("Calories", (Cereal c) -> new Data<>(Integer.toString(c.getShelf()), c.getCalories()));
-        addData("Protein", (Cereal c) -> new Data<>(Integer.toString(c.getShelf()), c.getProtein()));
-        addData("Fat", (Cereal c) -> new Data<>(Integer.toString(c.getShelf()), c.getFat()));
-        addData("Sodium", (Cereal c) -> new Data<>(Integer.toString(c.getShelf()), c.getSodium()));
-        addData("Fiber", (Cereal c) -> new Data<>(Integer.toString(c.getShelf()), c.getFiber()));
-        addData("Carbohydrates", (Cereal c) -> new Data<>(Integer.toString(c.getShelf()), c.getCarbohydrates()));
-        addData("Sugars", (Cereal c) -> new Data<>(Integer.toString(c.getShelf()), c.getSugars()));
-        addData("Potassium", (Cereal c) -> new Data<>(Integer.toString(c.getShelf()), c.getPotassium()));
-    }
-
-    private void addData(String name, DataCreator creator) {
-        Series<String, Number> series = new Series<>();
-        series.setName(name);
-
-        final List<Data<String, Number>> list = series.getData();
-        cereals.stream().sorted((c1, c2) -> c1.getShelf() - c2.getShelf()).forEach(c -> list.add(creator.construct(c)));
-        this.getData().add(series);
-    }
-    @FunctionalInterface
-    private interface DataCreator {
-        public Data<String, Number> construct(Cereal c);
+        showAverage();
     }
 
     private void showData(DoubleBinaryOperator op) {
         this.getData().clear();
 
-        showData(c -> c.getShelf() == 1, 1, op);
-        showData(c -> c.getShelf() == 2, 2, op);
-        showData(c -> c.getShelf() == 3, 3, op);
+        showData("Calories", Cereal::getCalories, op);
+        showData("Protein", Cereal::getProtein, op);
+        showData("Fat", Cereal::getFat, op);
+        showData("Sodium", Cereal::getSodium, op);
+        showData("Fiber", Cereal::getFiber, op);
+        showData("Carbohydrates", Cereal::getCarbohydrates, op);
+        showData("Sugars", Cereal::getSugars, op);
+        showData("Potassium", Cereal::getPotassium, op);
     }
 
-    private void showData(Predicate<? super Cereal> p, int shelf, DoubleBinaryOperator op) {
-        showData(cereals.stream().filter(p), shelf, "Calories", Cereal::getCalories, op);
-        showData(cereals.stream().filter(p), shelf,"Protein", Cereal::getProtein, op);
-        showData(cereals.stream().filter(p), shelf,"Fat", Cereal::getFat, op);
-        showData(cereals.stream().filter(p), shelf,"Sodium", Cereal::getSodium, op);
-        showData(cereals.stream().filter(p), shelf,"Fiber", Cereal::getFiber, op);
-        showData(cereals.stream().filter(p), shelf,"Carbohydrates", Cereal::getCarbohydrates, op);
-        showData(cereals.stream().filter(p), shelf,"Sugars", Cereal::getSugars, op);
-        showData(cereals.stream().filter(p), shelf,"Potassium", Cereal::getPotassium, op);
-    }
+    private void showData(String name, ToDoubleFunction<? super Cereal> function, DoubleBinaryOperator op) {
 
-    private void showData(Stream<Cereal> stream, int shelf, String name, ToDoubleFunction<? super Cereal> function, DoubleBinaryOperator op) {
         Series<String, Number> series = new Series<>();
         series.setName(name);
-        
-//        cereals.stream().col
-//        System.out.println(function);
-        DoubleStream dStream = stream.mapToDouble(function);
-        OptionalDouble val = dStream.reduce(op);
-        
-        series.getData().add(new Data<String, Number>(Integer.toString(shelf), val.getAsDouble()));
+
+        mapByShelf.forEach((Integer shelf, List<Cereal> list) -> {
+
+            OptionalDouble val = list.stream().mapToDouble(function).filter(v -> v != -1).reduce(op);
+            series.getData().add(new Data<>(Integer.toString(shelf), val.getAsDouble()));
+
+        });
         this.getData().add(series);
     }
 
@@ -121,7 +108,30 @@ public class ContentBarChart extends BarChart<String, Number> {
     }
 
     public void showAverage() {
-        System.out.println("Show average!");
+        this.getData().clear();
+
+        showDataAverage("Calories", Cereal::getCalories);
+        showDataAverage("Protein", Cereal::getProtein);
+        showDataAverage("Fat", Cereal::getFat);
+        showDataAverage("Sodium", Cereal::getSodium);
+        showDataAverage("Fiber", Cereal::getFiber);
+        showDataAverage("Carbohydrates", Cereal::getCarbohydrates);
+        showDataAverage("Sugars", Cereal::getSugars);
+        showDataAverage("Potassium", Cereal::getPotassium);
+    }
+
+    private void showDataAverage(String name, ToDoubleFunction<? super Cereal> function) {
+
+        Series<String, Number> series = new Series<>();
+        series.setName(name);
+
+        mapByShelf.forEach((Integer shelf, List<Cereal> list) -> {
+
+            OptionalDouble val = list.stream().mapToDouble(function).filter(v -> v != -1).average();
+            series.getData().add(new Data<>(Integer.toString(shelf), val.getAsDouble()));
+
+        });
+        this.getData().add(series);
     }
 
     public void showMedian() {
