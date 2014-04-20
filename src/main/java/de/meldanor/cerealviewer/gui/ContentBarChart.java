@@ -42,7 +42,7 @@ public class ContentBarChart extends BarChart<String, Number> {
     private Map<Integer, List<Cereal>> mapByShelf;
 
     public ContentBarChart(List<Cereal> cereals) {
-        super(new CategoryAxis(), new NumberAxis(0,350,50));
+        super(new CategoryAxis(), new NumberAxis(0, 350, 50));
 
         this.prepareData(cereals);
 
@@ -72,6 +72,14 @@ public class ContentBarChart extends BarChart<String, Number> {
         showAverage();
     }
 
+    public void showMaximum() {
+        showData(Double::max);
+    }
+
+    public void showMinimum() {
+        showData(Double::min);
+    }
+
     private void showData(DoubleBinaryOperator op) {
         this.getData().clear();
 
@@ -97,14 +105,6 @@ public class ContentBarChart extends BarChart<String, Number> {
 
         });
         this.getData().add(series);
-    }
-
-    public void showMaximum() {
-        showData(Double::max);
-    }
-
-    public void showMinimum() {
-        showData(Double::min);
     }
 
     public void showAverage() {
@@ -135,6 +135,30 @@ public class ContentBarChart extends BarChart<String, Number> {
     }
 
     public void showMedian() {
-        System.out.println("Show median!");
+        this.getData().clear();
+
+        showMedianData("Calories", Cereal::getCalories);
+        showMedianData("Protein", Cereal::getProtein);
+        showMedianData("Fat", Cereal::getFat);
+        showMedianData("Sodium", Cereal::getSodium);
+        showMedianData("Fiber", Cereal::getFiber);
+        showMedianData("Carbohydrates", Cereal::getCarbohydrates);
+        showMedianData("Sugars", Cereal::getSugars);
+        showMedianData("Potassium", Cereal::getPotassium);
+    }
+
+    private void showMedianData(String name, ToDoubleFunction<? super Cereal> function) {
+
+        Series<String, Number> series = new Series<>();
+        series.setName(name);
+
+        mapByShelf.forEach((Integer shelf, List<Cereal> list) -> {
+
+            double[] vals = list.stream().mapToDouble(function).filter(v -> v != -1).sorted().toArray();
+            double value = vals[vals.length / 2];
+            series.getData().add(new Data<>(Integer.toString(shelf), value));
+
+        });
+        this.getData().add(series);
     }
 }

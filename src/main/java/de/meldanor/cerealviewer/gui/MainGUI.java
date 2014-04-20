@@ -77,6 +77,7 @@ public class MainGUI extends Application {
         ToggleButton showAverageButton = new ToggleButton("Average");
         showAverageButton.setToggleGroup(controllGroup);
         showAverageButton.setOnAction(e -> chart.showAverage());
+        showAverageButton.setSelected(true);
 
         controllPane.getChildren().addAll(showMinButton, showMaxButton, showMedianButton, showAverageButton);
 
