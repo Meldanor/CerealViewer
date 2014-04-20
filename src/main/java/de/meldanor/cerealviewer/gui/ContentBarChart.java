@@ -37,12 +37,12 @@ import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import de.meldanor.cerealviewer.data.Cereal;
 
-public class ContentBarChart extends BarChart<String, Number> {
+public class ContentBarChart extends BarChart<Number, String> {
 
     private Map<Integer, List<Cereal>> mapByShelf;
 
     public ContentBarChart(List<Cereal> cereals) {
-        super(new CategoryAxis(), new NumberAxis(0, 350, 25));
+        super(new NumberAxis(0, 350, 25), new CategoryAxis());
 
         this.prepareData(cereals);
 
@@ -64,12 +64,12 @@ public class ContentBarChart extends BarChart<String, Number> {
 
     private void initGUI() {
 
-        setVerticalGridLinesVisible(false);
+        setHorizontalGridLinesVisible(false);
         setCategoryGap(100);
-        setBarGap(0);
+        setBarGap(10);
         setAnimated(false);
-        
-        getXAxis().setLabel("Shelf");
+
+        getYAxis().setLabel("Shelf");
 
         showAverage();
     }
@@ -97,13 +97,13 @@ public class ContentBarChart extends BarChart<String, Number> {
 
     private void showData(String name, ToDoubleFunction<? super Cereal> function, DoubleBinaryOperator op) {
 
-        Series<String, Number> series = new Series<>();
+        Series<Number, String> series = new Series<>();
         series.setName(name);
 
         mapByShelf.forEach((Integer shelf, List<Cereal> list) -> {
 
             OptionalDouble val = list.stream().mapToDouble(function).filter(v -> v != -1).reduce(op);
-            series.getData().add(new Data<>(Integer.toString(shelf), val.getAsDouble()));
+            series.getData().add(new Data<>(val.getAsDouble(), Integer.toString(shelf)));
 
         });
         this.getData().add(series);
@@ -124,13 +124,13 @@ public class ContentBarChart extends BarChart<String, Number> {
 
     private void showDataAverage(String name, ToDoubleFunction<? super Cereal> function) {
 
-        Series<String, Number> series = new Series<>();
+        Series<Number, String> series = new Series<>();
         series.setName(name);
 
         mapByShelf.forEach((Integer shelf, List<Cereal> list) -> {
 
             OptionalDouble val = list.stream().mapToDouble(function).filter(v -> v != -1).average();
-            series.getData().add(new Data<>(Integer.toString(shelf), val.getAsDouble()));
+            series.getData().add(new Data<>(val.getAsDouble(), Integer.toString(shelf)));
 
         });
         this.getData().add(series);
@@ -151,14 +151,14 @@ public class ContentBarChart extends BarChart<String, Number> {
 
     private void showMedianData(String name, ToDoubleFunction<? super Cereal> function) {
 
-        Series<String, Number> series = new Series<>();
+        Series<Number, String> series = new Series<>();
         series.setName(name);
 
         mapByShelf.forEach((Integer shelf, List<Cereal> list) -> {
 
             double[] vals = list.stream().mapToDouble(function).filter(v -> v != -1).sorted().toArray();
             double value = vals[vals.length / 2];
-            series.getData().add(new Data<>(Integer.toString(shelf), value));
+            series.getData().add(new Data<>(value, Integer.toString(shelf)));
 
         });
         this.getData().add(series);
