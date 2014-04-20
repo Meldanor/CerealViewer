@@ -42,7 +42,7 @@ public class ContentBarChart extends BarChart<String, Number> {
     private Map<Integer, List<Cereal>> mapByShelf;
 
     public ContentBarChart(List<Cereal> cereals) {
-        super(new CategoryAxis(), new NumberAxis(0, 350, 50));
+        super(new CategoryAxis(), new NumberAxis(0, 350, 25));
 
         this.prepareData(cereals);
 
@@ -68,6 +68,8 @@ public class ContentBarChart extends BarChart<String, Number> {
         setCategoryGap(100);
         setBarGap(0);
         setAnimated(false);
+        
+        getXAxis().setLabel("Shelf");
 
         showAverage();
     }
