@@ -32,7 +32,6 @@ import java.util.stream.Stream;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.Scene;
 import javafx.scene.chart.PieChart;
 import de.meldanor.cerealviewer.data.Cereal;
 import de.meldanor.cerealviewer.util.Counter;
@@ -41,59 +40,30 @@ public class ManufactorPie extends PieChart {
 
     private Map<String, Counter> manufactorFrequency;
 
-    public ManufactorPie(Scene scene, List<Cereal> cereals) {
-        this.manufactorFrequency = countManufactors(cereals);
+    public ManufactorPie(List<Cereal> cereals, int shelf) {
+        this.manufactorFrequency = countManufactors(cereals, shelf);
         this.initGUI();
     }
 
-    private Map<String, Counter> countManufactors(List<Cereal> cereals) {
+    private Map<String, Counter> countManufactors(List<Cereal> cereals, int shelf) {
         HashMap<String, Counter> frequency = new HashMap<>();
-        System.out.println(cereals);
         // Create counter for every manufactor
         cereals.stream().map(Cereal::getManufacturer).distinct().forEach(s -> frequency.put(s, new Counter()));
         // Count the manufactor
-        cereals.stream().forEach(c -> frequency.get(c.getManufacturer()).increment());
+        cereals.stream().filter(c -> c.getShelf() == shelf).forEach(c -> frequency.get(c.getManufacturer()).increment());
 
         return frequency;
     }
 
     private void initGUI() {
         ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList();
+
         // Sort the map using the frequency
-        Stream<Entry<String, Counter>> stream = manufactorFrequency.entrySet().stream().sorted((Entry<String, Counter> e1, Entry<String, Counter> e2) -> Long.compare(e1.getValue().get(), e2.getValue().get()));
+        Stream<Entry<String, Counter>> stream = manufactorFrequency.entrySet().stream().sorted((Entry<String, Counter> e1, Entry<String, Counter> e2) -> e1.getKey().compareTo(e2.getKey()));
         // Add sorted map to list
         stream.forEach((Entry<String, Counter> e) -> pieChartData.add(new Data(e.getKey(), e.getValue().get())));
 
         this.setData(pieChartData);
-        this.setTitle("Cereal Manufactors");
     }
-
-//    @Override
-//    public void start(Stage stage) {
-//
-//        ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList();
-//        Stream<Entry<String, Counter>> stream = manufactorFrequency.entrySet().stream().sorted((Entry<String, Counter> e1, Entry<String, Counter> e2) -> Long.compare(e1.getValue().count(), e2.getValue().count()));
-//        stream.forEach((Entry<String, Counter> e) -> pieChartData.add(new Data(e.getKey(), e.getValue().count())));
-//
-//        final PieChart chart = new PieChart(pieChartData);
-//
-//        final Label caption = new Label("");
-//        caption.setTextFill(Color.DARKORANGE);
-//        caption.setStyle("-fx-font: 24 arial;");
-//
-//        chart.setTitle("Cereal Manufactors");
-//        chart.getData().forEach(d -> {
-//            d.getNode().addEventHandler(MouseEvent.MOUSE_MOVED, (MouseEvent e) -> {
-//                caption.setTranslateX(e.getSceneX());
-//                caption.setTranslateY(e.getSceneY());
-//                caption.setText(String.valueOf(d.getPieValue()) + "%");
-////                System.out.println(String.valueOf(d.getPieValue()) + "%");
-//            });
-//        });
-//
-//        ((Group) scene.getRoot()).getChildren().add(chart);
-//        ((Group) scene.getRoot()).getChildren().add(caption);
-//
-//    }
 
 }

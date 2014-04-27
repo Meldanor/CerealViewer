@@ -29,7 +29,7 @@ public class Counter implements Comparable<Counter> {
     private long value;
 
     public Counter() {
-        value = 0;
+        value = 0L;
     }
 
     public void increment() {

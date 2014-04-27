@@ -24,6 +24,8 @@
 
 package de.meldanor.cerealviewer.gui;
 
+import java.util.Comparator;
+
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -36,6 +38,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import de.meldanor.cerealviewer.Core;
+import de.meldanor.cerealviewer.data.Cereal;
 
 public class MainGUI extends Application {
 
@@ -48,6 +51,12 @@ public class MainGUI extends Application {
 
         ContentBarChart chart = new ContentBarChart(Core.cereals);
         pane.setCenter(chart);
+
+        VBox piePane = new VBox();
+        Core.cereals.stream().map(Cereal::getShelf).distinct().sorted(Comparator.reverseOrder()).forEach((shelf) -> {
+            piePane.getChildren().add(new ManufactorPie(Core.cereals, shelf));
+        });
+        pane.setLeft(piePane);
 
         VBox controllPane = new VBox(20.0);
         controllPane.setPadding(new Insets(100, 20, 10, 10));
