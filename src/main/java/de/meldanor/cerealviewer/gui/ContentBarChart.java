@@ -65,7 +65,7 @@ public class ContentBarChart extends BarChart<Number, String> {
     private void initGUI() {
 
         setHorizontalGridLinesVisible(false);
-        setCategoryGap(100);
+        setCategoryGap(25);
         setBarGap(10);
         setAnimated(false);
 
